@@ -201,17 +201,17 @@ export default function Home() {
   };
 
   return (
-    <section className="w-full h-full">
+    <section className="w-full h-full px-5">
       {xmlContent ? (
         <section>
           {table1Data && (
-            <section className="flex gap-x-2 font-bold text-xl p-4">
+            <section className="flex gap-x-2 font-bold text-xl py-2">
               <h1>{table1Data.textbox25}</h1>—<h1>{table1Data.textbox5}</h1>
             </section>
           )}
 
           {/* Search Functionality */}
-          <section className="px-4">
+          <section className="">
             <h1 className="font-bold">Search</h1>
             <section>
               <input
