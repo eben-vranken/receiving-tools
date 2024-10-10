@@ -67,7 +67,6 @@ export default function Home() {
         });
 
         setParsedData(dataArray);
-        // Initialize selectedRows with empty arrays for each unique iorOrder
         const uniqueIorOrders = Array.from(new Set(dataArray.map(item => item.iorOrder)));
         setSelectedRows(uniqueIorOrders.map(() => []));
       };
@@ -118,10 +117,9 @@ export default function Home() {
     const printWindow = window.open("", "_blank");
     if (printWindow) {
       const tableRowsHtml = filteredData
-        .map((detail, index) => {
+        .map((detail) => {
           const orderIndex = parsedData.findIndex(item => item.iorOrder === detail.iorOrder);
           const isSelected = selectedRows[orderIndex]?.includes(detail.itemNo || "") || false;
-
           return `
           <tr class="${isSelected ? "bg-green-500 text-black" : ""}">
             <td>${isSelected
@@ -142,7 +140,7 @@ export default function Home() {
       const printContent = `
         <html>
           <head>
-            <style>
+            <style >
               @page {
                 size: landscape;
                 margin: 20px;
@@ -173,7 +171,7 @@ export default function Home() {
             </style>
           </head>
           <body>
-            <h1>Table Content</h1>
+            <h1>${table1Data?.textbox25} - ${table1Data?.textbox5}</h1>
             <table>
               <thead>
                 <tr>
