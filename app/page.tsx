@@ -75,6 +75,7 @@ export default function Home() {
     }
   };
 
+
   const filteredData = parsedData.filter(
     (detail) =>
       detail.itemNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,6 +96,11 @@ export default function Home() {
       if (orderIndex === -1) {
         console.error("Order not found");
         return prevSelectedRows;
+      }
+
+      // Initialize the array for this order if it doesn't exist
+      if (!newSelectedRows[orderIndex]) {
+        newSelectedRows[orderIndex] = [];
       }
 
       const isCurrentlySelected = newSelectedRows[orderIndex].includes(itemNo);
@@ -267,7 +273,7 @@ export default function Home() {
                       </tr>
                     )}
                     <tr
-                      className={`border-b [&>*]:px-4 ${isSelected ? "bg-green-500 text-black border-black" : ""
+                      className={`border-b [&>*]:px-4 cursor-pointer ${isSelected ? "bg-green-500 text-black border-black" : ""
                         }`}
                     >
                       <td className="py-2 border">
