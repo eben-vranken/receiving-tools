@@ -1,7 +1,6 @@
 'use client'
 
-import React from "react";
-import { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 
 interface Table1Data {
   textbox25: string | null;
@@ -22,6 +21,7 @@ export default function Home() {
   const [xmlContent, setXmlContent] = useState<string>("");
   const [parsedData, setParsedData] = useState<DetailData[]>([]);
   const [table1Data, setTable1Data] = useState<Table1Data | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -36,7 +36,6 @@ export default function Home() {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlData, "application/xml");
 
-        // Access <table1> and get its attributes
         const table1 = xmlDoc.getElementsByTagName("table1")[0];
         if (table1) {
           const table1Attributes: Table1Data = {
@@ -46,14 +45,12 @@ export default function Home() {
           setTable1Data(table1Attributes);
         }
 
-        // Access <table1_Group1> and get the orders
         const groupElements = xmlDoc.getElementsByTagName("table1_Group1");
         const dataArray: DetailData[] = [];
 
         Array.from(groupElements).forEach((group) => {
           const iorOrder = group.getAttribute("textbox6");
 
-          // Access <Detail> elements inside each group
           const details = group.getElementsByTagName("Detail");
           Array.from(details).forEach((detail) => {
             dataArray.push({
@@ -63,7 +60,7 @@ export default function Home() {
               requiredLocations: detail.getAttribute("RequiredLocations"),
               zone: detail.getAttribute("Zone"),
               locations: detail.getAttribute("Locations"),
-              iorOrder: iorOrder, // Link each detail to its IOR order
+              iorOrder: iorOrder,
             });
           });
         });
@@ -75,37 +72,54 @@ export default function Home() {
     }
   };
 
+  const filteredData = parsedData.filter((detail) =>
+    detail.itemNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    detail.quantity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    detail.binType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    detail.requiredLocations?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    detail.zone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    detail.locations?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <section className="w-full h-full">
       {xmlContent ? (
         <section>
           {table1Data && (
-            <section className="flex gap-x-2 font-bold text-xl m-3">
+            <section className="flex gap-x-2 font-bold text-xl px-4">
               <h1>{table1Data.textbox25}</h1>
               —
               <h1>{table1Data.textbox5}</h1>
             </section>
           )}
 
-          {/* Search functionality */}
-          <section>
-
+          <section className="[&>*]:px-4">
+            <h1 className="font-bold">Search</h1>
+            <section>
+              <input
+                type="text"
+                className="border bg-transparent rounded px-2 py-1 w-[300px]"
+                placeholder="Item name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </section>
           </section>
 
-          <table className="min-w-full table-auto border-collapse my-5">
+          <table className="px-4 min-w-full table-auto border-collapse my-5">
             <thead>
               <tr className="border-b">
-                <th className="px-4 py-2 border">Item No</th>
-                <th className="px-4 py-2 border">Quantity</th>
-                <th className="px-4 py-2 border">Bin Type</th>
-                <th className="px-4 py-2 border">Required Locations</th>
-                <th className="px-4 py-2 border">Zone</th>
-                <th className="px-4 py-2 border">Locations</th>
+                <th className="py-2 border">Item No</th>
+                <th className="py-2 border">Quantity</th>
+                <th className="py-2 border">Bin Type</th>
+                <th className="py-2 border">Required Locations</th>
+                <th className="py-2 border">Zone</th>
+                <th className="py-2 border">Locations</th>
               </tr>
             </thead>
             <tbody>
-              {parsedData.map((detail, index) => {
-                const prevDetail = parsedData[index - 1];
+              {filteredData.map((detail, index) => {
+                const prevDetail = filteredData[index - 1];
                 const isNewOrder =
                   index === 0 || detail.iorOrder !== prevDetail?.iorOrder;
 
@@ -118,13 +132,13 @@ export default function Home() {
                         </td>
                       </tr>
                     )}
-                    <tr className="border-b">
-                      <td className="px-4 py-2 border">{detail.itemNo}</td>
-                      <td className="px-4 py-2 border">{detail.quantity}</td>
-                      <td className="px-4 py-2 border">{detail.binType}</td>
-                      <td className="px-4 py-2 border">{detail.requiredLocations}</td>
-                      <td className="px-4 py-2 border">{detail.zone}</td>
-                      <td className="px-4 py-2 border">{detail.locations}</td>
+                    <tr className="border-b [&>*]:px-4">
+                      <td className="py-2 border">{detail.itemNo}</td>
+                      <td className="py-2 border">{detail.quantity}</td>
+                      <td className="py-2 border">{detail.binType}</td>
+                      <td className="py-2 border">{detail.requiredLocations}</td>
+                      <td className="py-2 border">{detail.zone}</td>
+                      <td className="py-2 border">{detail.locations}</td>
                     </tr>
                   </React.Fragment>
                 );
