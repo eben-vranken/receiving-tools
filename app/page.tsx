@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useState, ChangeEvent } from "react";
 
@@ -22,6 +22,7 @@ export default function Home() {
   const [parsedData, setParsedData] = useState<DetailData[]>([]);
   const [table1Data, setTable1Data] = useState<Table1Data | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedRows, setSelectedRows] = useState<string[][]>([]);
 
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -66,20 +67,140 @@ export default function Home() {
         });
 
         setParsedData(dataArray);
+        // Initialize selectedRows with empty arrays for each unique iorOrder
+        const uniqueIorOrders = Array.from(new Set(dataArray.map(item => item.iorOrder)));
+        setSelectedRows(uniqueIorOrders.map(() => []));
       };
 
       reader.readAsText(file);
     }
   };
 
-  const filteredData = parsedData.filter((detail) =>
-    detail.itemNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    detail.quantity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    detail.binType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    detail.requiredLocations?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    detail.zone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    detail.locations?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredData = parsedData.filter(
+    (detail) =>
+      detail.itemNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      detail.quantity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      detail.binType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      detail.requiredLocations
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      detail.zone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      detail.locations?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleCheckboxChange = (itemNo: string, iorOrder: string | null) => {
+    setSelectedRows((prevSelectedRows) => {
+      const newSelectedRows = [...prevSelectedRows];
+      const orderIndex = parsedData.findIndex(item => item.iorOrder === iorOrder);
+
+      if (orderIndex === -1) {
+        console.error("Order not found");
+        return prevSelectedRows;
+      }
+
+      const isCurrentlySelected = newSelectedRows[orderIndex].includes(itemNo);
+
+      if (isCurrentlySelected) {
+        // Unselect
+        newSelectedRows[orderIndex] = newSelectedRows[orderIndex].filter(item => item !== itemNo);
+        console.log("Unselected", itemNo);
+      } else {
+        // Select
+        newSelectedRows[orderIndex] = [...newSelectedRows[orderIndex], itemNo];
+        console.log("Selected", itemNo);
+      }
+
+      return newSelectedRows;
+    });
+  };
+
+  const printTable = () => {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      const tableRowsHtml = filteredData
+        .map((detail, index) => {
+          const orderIndex = parsedData.findIndex(item => item.iorOrder === detail.iorOrder);
+          const isSelected = selectedRows[orderIndex]?.includes(detail.itemNo || "") || false;
+
+          return `
+          <tr class="${isSelected ? "bg-green-500 text-black" : ""}">
+            <td>${isSelected
+              ? '<input type="checkbox" checked />'
+              : '<input type="checkbox" />'
+            }</td>
+            <td>${detail.itemNo}</td>
+            <td>${detail.quantity}</td>
+            <td>${detail.binType}</td>
+            <td>${detail.requiredLocations}</td>
+            <td>${detail.zone}</td>
+            <td>${detail.locations}</td>
+          </tr>
+        `;
+        })
+        .join("");
+
+      const printContent = `
+        <html>
+          <head>
+            <style>
+              @page {
+                size: landscape;
+                margin: 20px;
+              }
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+              }
+              th, td {
+                border: 1px solid black;
+                padding: 12px;
+                text-align: left;
+                vertical-align: top;
+              }
+              th {
+                background-color: #f2f2f2;
+              }
+              tr:nth-child(even) {
+                background-color: #f9f9f9;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>Table Content</h1>
+            <table>
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>Item No</th>
+                  <th>Quantity</th>
+                  <th>Bin Type</th>
+                  <th>Required Locations</th>
+                  <th>Zone</th>
+                  <th>Locations</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRowsHtml}
+              </tbody>
+            </table>
+            <script>
+              window.print();
+              window.close();
+            </script>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(printContent);
+    }
+  };
 
   return (
     <section className="w-full h-full">
@@ -87,13 +208,12 @@ export default function Home() {
         <section>
           {table1Data && (
             <section className="flex gap-x-2 font-bold text-xl px-4">
-              <h1>{table1Data.textbox25}</h1>
-              —
-              <h1>{table1Data.textbox5}</h1>
+              <h1>{table1Data.textbox25}</h1>—<h1>{table1Data.textbox5}</h1>
             </section>
           )}
 
-          <section className="[&>*]:px-4">
+          {/* Search Functionality */}
+          <section className="px-4">
             <h1 className="font-bold">Search</h1>
             <section>
               <input
@@ -104,11 +224,21 @@ export default function Home() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </section>
+            <button
+              onClick={printTable}
+              className="px-3 py-1 bg-blue-500 text-white rounded my-4"
+            >
+              Print Table
+            </button>
           </section>
 
-          <table className="px-4 min-w-full table-auto border-collapse my-5">
+          <table
+            id="printableTable"
+            className="px-4 min-w-full table-auto border-collapse my-5"
+          >
             <thead>
               <tr className="border-b">
+                <th className="py-2 border">Select</th>
                 <th className="py-2 border">Item No</th>
                 <th className="py-2 border">Quantity</th>
                 <th className="py-2 border">Bin Type</th>
@@ -123,20 +253,43 @@ export default function Home() {
                 const isNewOrder =
                   index === 0 || detail.iorOrder !== prevDetail?.iorOrder;
 
+                const orderIndex = parsedData.findIndex(item => item.iorOrder === detail.iorOrder);
+                const isSelected = selectedRows[orderIndex]?.includes(detail.itemNo || "") || false;
+
                 return (
                   <React.Fragment key={index}>
                     {isNewOrder && (
                       <tr>
-                        <td colSpan={6} className="px-4 py-2 font-bold bg-gray-500">
+                        <td
+                          colSpan={7}
+                          className="px-4 py-2 font-bold bg-gray-500"
+                        >
                           {detail.iorOrder}
                         </td>
                       </tr>
                     )}
-                    <tr className="border-b [&>*]:px-4">
+                    <tr
+                      className={`border-b [&>*]:px-4 ${isSelected ? "bg-green-500 text-black border-black" : ""
+                        }`}
+                    >
+                      <td className="py-2 border">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() =>
+                            handleCheckboxChange(
+                              detail.itemNo || "",
+                              detail.iorOrder || ""
+                            )
+                          }
+                        />
+                      </td>
                       <td className="py-2 border">{detail.itemNo}</td>
                       <td className="py-2 border">{detail.quantity}</td>
                       <td className="py-2 border">{detail.binType}</td>
-                      <td className="py-2 border">{detail.requiredLocations}</td>
+                      <td className="py-2 border">
+                        {detail.requiredLocations}
+                      </td>
                       <td className="py-2 border">{detail.zone}</td>
                       <td className="py-2 border">{detail.locations}</td>
                     </tr>
@@ -147,16 +300,16 @@ export default function Home() {
           </table>
         </section>
       ) : (
-        <section className="h-full flex justify-center items-center">
-          <form className="flex flex-col gap-y-1">
-            <label htmlFor="xmlFile" className="font-bold text-xl">Upload XML File:</label>
+        <section className="h-full flex flex-col items-center justify-center">
+          <section>
+            <h1 className="font-bold text-2xl">Upload ontvangst XML</h1>
             <input
               type="file"
-              id="xmlFile"
               accept=".xml"
               onChange={handleFileUpload}
+              className="px-4 py-2"
             />
-          </form>
+          </section>
         </section>
       )}
     </section>
