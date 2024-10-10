@@ -60,7 +60,7 @@ export default function Home() {
               binType: detail.getAttribute("BinType"),
               requiredLocations: detail.getAttribute("RequiredLocations"),
               zone: detail.getAttribute("Zone"),
-              locations: detail.getAttribute("Locations"),
+              locations: detail.getAttribute("Locations") || "",
               iorOrder: iorOrder,
             });
           });
