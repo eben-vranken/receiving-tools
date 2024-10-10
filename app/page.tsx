@@ -205,7 +205,7 @@ export default function Home() {
       {xmlContent ? (
         <section>
           {table1Data && (
-            <section className="flex gap-x-2 font-bold text-xl px-4">
+            <section className="flex gap-x-2 font-bold text-xl p-4">
               <h1>{table1Data.textbox25}</h1>—<h1>{table1Data.textbox5}</h1>
             </section>
           )}
