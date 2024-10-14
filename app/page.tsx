@@ -156,6 +156,7 @@ export default function Home() {
                 margin: 0;
                 padding: 0;
                 overflow: hidden;
+                font-size: 12px;
               }
               table {
                 width: 100%;
