@@ -119,93 +119,103 @@ export default function Home() {
     });
   };
 
-  const printTable = () => {
-    const printWindow = window.open("", "_blank");
-    if (printWindow) {
-      const tableRowsHtml = filteredData
-        .map((detail) => {
-          const orderIndex = parsedData.findIndex(item => item.iorOrder === detail.iorOrder);
-          const isSelected = selectedRows[orderIndex]?.includes(detail.itemNo || "") || false;
-          return `
-          <tr class="${isSelected ? "bg-green-500 text-black" : ""}">
-            <td>${isSelected
-              ? '<input type="checkbox" checked />'
-              : '<input type="checkbox" />'
-            }</td>
-            <td>${detail.itemNo}</td>
-            <td>${detail.quantity}</td>
-            <td>${detail.binType}</td>
-            <td>${detail.newLocations}</td>
-            <td>${detail.zone}</td>
-            <td>${detail.locations}</td>
-          </tr>
-        `;
-        })
-        .join("");
+const printTable = () => {
+  const printWindow = window.open("", "_blank");
+  if (printWindow) {
+    const currentDate = new Date().toLocaleString(); // Get the current date and time
 
-      const printContent = `
-        <html>
-          <head>
-            <style >
-              @page {
-                size: landscape;
-                margin: 20px;
-              }
-              body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                font-size: 12px;
-              }
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                table-layout: fixed;
-              }
-              th, td {
-                border: 1px solid black;
-                padding: 12px;
-                text-align: left;
-                vertical-align: top;
-              }
-              th {
-                background-color: #f2f2f2;
-              }
-              tr:nth-child(even) {
-                background-color: #f9f9f9;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>${table1Data?.textbox25} - ${table1Data?.textbox5}</h1>
-            <table>
-              <thead>
-                <tr>
-                  <th>Select</th>
-                  <th>Item No</th>
-                  <th>Quantity</th>
-                  <th>Bin Type</th>
-                  <th>Required Locations</th>
-                  <th>Zone</th>
-                  <th>Locations</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tableRowsHtml}
-              </tbody>
-            </table>
-            <script>
-              window.print();
-              window.close();
-            </script>
-          </body>
-        </html>
+    const tableRowsHtml = filteredData
+      .map((detail) => {
+        const orderIndex = parsedData.findIndex(item => item.iorOrder === detail.iorOrder);
+        const isSelected = selectedRows[orderIndex]?.includes(detail.itemNo || "") || false;
+        return `
+        <tr class="${isSelected ? "bg-green-500 text-black" : ""}">
+          <td>${isSelected
+            ? '<input type="checkbox" checked />'
+            : '<input type="checkbox" />'
+          }</td>
+          <td>${detail.itemNo}</td>
+          <td>${detail.quantity}</td>
+          <td>${detail.binType}</td>
+          <td>${detail.newLocations}</td>
+          <td>${detail.zone}</td>
+          <td>${detail.locations}</td>
+        </tr>
       `;
+      })
+      .join("");
 
-      printWindow.document.write(printContent);
-    }
-  };
+    const printContent = `
+      <html>
+        <head>
+          <style >
+            @page {
+              size: landscape;
+              margin: 20px;
+            }
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              overflow: hidden;
+              font-size: 12px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              table-layout: fixed;
+            }
+            th, td {
+              border: 1px solid black;
+              padding: 12px;
+              text-align: left;
+              vertical-align: top;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            tr:nth-child(even) {
+              background-color: #f9f9f9;
+            }
+            footer {
+              position: fixed;
+              bottom: 10px;
+              left: 10px;
+              font-size: 10px;
+              color: grey;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${table1Data?.textbox25} - ${table1Data?.textbox5}</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Item No</th>
+                <th>Quantity</th>
+                <th>Bin Type</th>
+                <th>Required Locations</th>
+                <th>Zone</th>
+                <th>Locations</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRowsHtml}
+            </tbody>
+          </table>
+          <footer>Printed on: ${currentDate}</footer>
+          <script>
+            window.print();
+            window.close();
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(printContent);
+  }
+};
 
   return (
     <section className="w-full h-full px-5">
