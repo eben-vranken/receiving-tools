@@ -11,7 +11,7 @@ interface DetailData {
   itemNo: string | null;
   quantity: string | null;
   binType: string | null;
-  requiredLocations: string | null;
+  newLocations: string | null;
   zone: string | null;
   locations: string | null;
   iorOrder: string | null;
@@ -58,7 +58,7 @@ export default function Home() {
               itemNo: detail.getAttribute("Item_No_"),
               quantity: detail.getAttribute("Quantity"),
               binType: detail.getAttribute("BinType"),
-              requiredLocations: detail.getAttribute("RequiredLocations"),
+              newLocations: detail.getAttribute("textbox3"),
               zone: detail.getAttribute("Zone"),
               locations: detail.getAttribute("Locations") || "",
               iorOrder: iorOrder,
@@ -81,7 +81,7 @@ export default function Home() {
       detail.itemNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       detail.quantity?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       detail.binType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      detail.requiredLocations
+      detail.newLocations
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       detail.zone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -135,7 +135,7 @@ export default function Home() {
             <td>${detail.itemNo}</td>
             <td>${detail.quantity}</td>
             <td>${detail.binType}</td>
-            <td>${detail.requiredLocations}</td>
+            <td>${detail.newLocations}</td>
             <td>${detail.zone}</td>
             <td>${detail.locations}</td>
           </tr>
@@ -292,7 +292,7 @@ export default function Home() {
                       <td className="py-2 border">{detail.quantity}</td>
                       <td className="py-2 border">{detail.binType}</td>
                       <td className="py-2 border">
-                        {detail.requiredLocations}
+                        {detail.newLocations}
                       </td>
                       <td className="py-2 border">{detail.zone}</td>
                       <td className="py-2 border">{detail.locations}</td>
